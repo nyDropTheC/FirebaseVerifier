@@ -1,6 +1,7 @@
 name = "firebase-verifier"
 main = "src/worker.js"
 compatibility_date = "2023-06-20"
+node_compat = true
 
 # required secrets
 # FIREBASE_CONFIG_JSON

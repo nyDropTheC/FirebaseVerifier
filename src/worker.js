@@ -1,15 +1,27 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npm run deploy` to publish your worker
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
+import { verifyIdToken } from 'web-auth-library/google';
+
+// I get that this is completely useless and could have been done in 5 minutes from Rust
+// But I was lazy and thus I went with NodeJS
 
 export default {
-	async fetch(request, env, ctx) {
-		return new Response('Hello World!');
-	},
+	async fetch ( request, env, _ ) {
+		const [ bearer, token ] = request.headers.get ( 'Authorization' ).split ( ' ' );
+
+		if ( bearer !== 'Bearer' ) {
+			return new Response ( { status: 400 } );
+		}
+
+		try {
+			await verifyIdToken ( {
+				idToken: token,
+				env: {
+					GOOGLE_CLOUD_CREDENTIALS: env.FIREBASE_CONFIG_JSON
+				}
+			} );
+
+			return new Response ( null, { status: 200, statusText: 'OK' } );
+		} catch ( e ) { }
+
+		return new Response ( null, { status: 400 } );
+	}
 };
